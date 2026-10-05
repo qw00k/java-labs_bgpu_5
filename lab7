@@ -1,0 +1,49 @@
+import java.util.Scanner;
+
+public class CompoundInterest {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("1 вычислить итоговую сумму");
+        System.out.println("2 вычислить необходимый процент");
+        System.out.print("выберите");
+        int mode = scanner.nextInt();
+
+        if (mode == 1) {
+            System.out.print("начальная сумма");
+            double start = scanner.nextDouble();
+
+            System.out.print("процент");
+            double rate = scanner.nextDouble() / 100.0;
+
+            System.out.print("количество периодов: ");
+            int periods = scanner.nextInt();
+
+            double result = start * Math.pow(1 + rate, periods);
+            System.out.printf("итоговая сумма: %.2f%n", result);
+
+        } else if (mode == 2) {
+            System.out.print("начальная сумма: ");
+            double start = scanner.nextDouble();
+
+            System.out.print("желаемая сумма: ");
+            double target = scanner.nextDouble();
+
+            System.out.print("количество периодов: ");
+            int periods = scanner.nextInt();
+
+            if (start <= 0 || target <= 0 || periods <= 0) {
+                System.out.println("ошибка значения должны быть положительными");
+                return;
+            }
+
+            double rate = Math.pow(target / start, 1.0 / periods) - 1;
+            System.out.printf("необходимый процент за период: %.4f%%%n", rate * 100);
+            System.out.printf("итоговый процент за %d периодов: %.4f%%%n",
+                    periods, ((Math.pow(1 + rate, periods) - 1) * 100));
+
+        } else {
+            System.out.println("ошибка неизвестный режим");
+        }
+    }
+}
