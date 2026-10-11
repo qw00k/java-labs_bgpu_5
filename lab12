@@ -1,0 +1,99 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class Calculator extends JFrame implements ActionListener {
+
+    private final JTextField display = new JTextField("0");
+    private double firstOperand = 0;
+    private String pendingOp = null;
+    private boolean startNewNumber = true;
+
+    public Calculator() {
+        super("калькулятор");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setSize(300, 400);
+        setLocationRelativeTo(null);
+
+        display.setFont(new Font("Arial", Font.BOLD, 28));
+        display.setHorizontalAlignment(JTextField.RIGHT);
+        display.setEditable(false);
+        display.setBackground(Color.WHITE);
+        add(display, BorderLayout.NORTH);
+
+        JPanel panel = new JPanel(new GridLayout(4, 4, 5, 5));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        String[] buttons = {
+            "7", "8", "9", "/",
+            "4", "5", "6", "*",
+            "1", "2", "3", "-",
+            "C", "0", "=", "+"
+        };
+
+        for (String label : buttons) {
+            JButton btn = new JButton(label);
+            btn.setFont(new Font("Arial", Font.BOLD, 20));
+            btn.addActionListener(this);
+            panel.add(btn);
+        }
+
+        add(panel, BorderLayout.CENTER);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String cmd = e.getActionCommand();
+
+        if (cmd.matches("[0-9]")) {
+            if (startNewNumber) {
+                display.setText(cmd);
+                startNewNumber = false;
+            } else {
+                display.setText(display.getText() + cmd);
+            }
+        } else if (cmd.equals("C")) {
+            display.setText("0");
+            firstOperand = 0;
+            pendingOp = null;
+            startNewNumber = true;
+        } else if (cmd.equals("=")) {
+            if (pendingOp != null) {
+                double second = Double.parseDouble(display.getText());
+                double result = calculate(firstOperand, second, pendingOp);
+                display.setText(format(result));
+                pendingOp = null;
+                startNewNumber = true;
+            }
+        } else {
+            firstOperand = Double.parseDouble(display.getText());
+            pendingOp = cmd;
+            startNewNumber = true;
+        }
+    }
+
+    private double calculate(double a, double b, String op) {
+        switch (op) {
+            case "+": return a + b;
+            case "-": return a - b;
+            case "*": return a * b;
+            case "/":
+                if (b == 0) {
+                    JOptionPane.showMessageDialog(this,
+                            "ошибка", JOptionPane.ERROR_MESSAGE);
+                    return 0;
+                }
+                return a / b;
+            default: return b;
+        }
+    }
+
+    private String format(double value) {
+        if (value == (long) value) return String.valueOf((long) value);
+        return String.valueOf(value);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new Calculator().setVisible(true));
+    }
+}
