@@ -1,0 +1,110 @@
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+
+public class TextEditor extends JFrame {
+
+    private final JTextArea textArea = new JTextArea();
+    private final JFileChooser fileChooser = new JFileChooser();
+    private File currentFile = null;
+
+    public TextEditor() {
+        super("текстовый редактор");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setSize(800, 600);
+        setLocationRelativeTo(null);
+
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        add(new JScrollPane(textArea), BorderLayout.CENTER);
+
+        JMenuBar menuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu("файл");
+
+        JMenuItem openItem = new JMenuItem("открыть");
+        JMenuItem saveItem = new JMenuItem("сохранить");
+        JMenuItem saveAsItem = new JMenuItem("сохранить как...");
+        JMenuItem exitItem = new JMenuItem("выход");
+
+        openItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
+        saveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
+
+        fileMenu.add(openItem);
+        fileMenu.add(saveItem);
+        fileMenu.add(saveAsItem);
+        fileMenu.addSeparator();
+        fileMenu.add(exitItem);
+        menuBar.add(fileMenu);
+        setJMenuBar(menuBar);
+
+        fileChooser.setFileFilter(new FileNameExtensionFilter("текстовые файлы (*.txt)", "txt"));
+
+        openItem.addActionListener(e -> openFile());
+        saveItem.addActionListener(e -> saveFile(false));
+        saveAsItem.addActionListener(e -> saveFile(true));
+        exitItem.addActionListener(e -> {
+            if (confirmExit()) System.exit(0);
+        });
+    }
+
+    private void openFile() {
+        int result = fileChooser.showOpenDialog(this);
+        if (result != JFileChooser.APPROVE_OPTION) return;
+
+        File file = fileChooser.getSelectedFile();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            textArea.read(reader, null);
+            currentFile = file;
+            setTitle("текстовый редактор — " + file.getName());
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "не удалось открыть файл: " + ex.getMessage(),
+                    "ошибка", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void saveFile(boolean saveAs) {
+        File target = currentFile;
+
+        if (saveAs || target == null) {
+            int result = fileChooser.showSaveDialog(this);
+            if (result != JFileChooser.APPROVE_OPTION) return;
+            target = fileChooser.getSelectedFile();
+
+            if (!target.getName().toLowerCase().endsWith(".txt")) {
+                target = new File(target.getAbsolutePath() + ".txt");
+            }
+
+            if (target.exists()) {
+                int choice = JOptionPane.showConfirmDialog(this,
+                        "файл уже существует. перезаписать?",
+                        "подтверждение", JOptionPane.YES_NO_OPTION);
+                if (choice != JOptionPane.YES_OPTION) return;
+            }
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(target))) {
+            textArea.write(writer);
+            currentFile = target;
+            setTitle("текстовый редактор — " + target.getName());
+            JOptionPane.showMessageDialog(this, "файл сохранён",
+                    "Успех", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "не удалось сохранить файл: " + ex.getMessage(),
+                    "ошибка", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private boolean confirmExit() {
+        int choice = JOptionPane.showConfirmDialog(this,
+                "выйти из редактора?",
+                "подтверждение", JOptionPane.YES_NO_OPTION);
+        return choice == JOptionPane.YES_OPTION;
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new TextEditor().setVisible(true));
+    }
+}
