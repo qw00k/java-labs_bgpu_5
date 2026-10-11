@@ -1,0 +1,75 @@
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
+
+public class FileDedup {
+
+    public static void removeDuplicates(String inputFile, String outputFile) throws IOException {
+        List<String> lines = Files.readAllLines(Paths.get(inputFile));
+        Set<String> seen = new LinkedHashSet<>();
+        int duplicates = 0;
+
+        for (String line : lines) {
+            if (!seen.add(line)) {
+                duplicates++;
+            }
+        }
+
+        List<String> result = new ArrayList<>(seen);
+        result.add("удалено дублирующихся строк: " + duplicates);
+
+        Files.write(Paths.get(outputFile), result);
+        System.out.println("файл обработан. удалено: " + duplicates);
+    }
+
+    public static void restore(String compressedFile, String restoredFile) throws IOException {
+        List<String> lines = Files.readAllLines(Paths.get(compressedFile));
+        List<String> restored = new ArrayList<>();
+
+        for (String line : lines) {
+            int sep = line.indexOf('|');
+            if (sep == -1) {
+                restored.add(line);
+                continue;
+            }
+            try {
+                int count = Integer.parseInt(line.substring(0, sep));
+                String text = line.substring(sep + 1);
+                for (int i = 0; i < count; i++) {
+                    restored.add(text);
+                }
+            } catch (NumberFormatException e) {
+                restored.add(line);
+            }
+        }
+
+        Files.write(Paths.get(restoredFile), restored);
+        System.out.println("файл восстановлен: " + restoredFile);
+    }
+
+    public static void compress(String inputFile, String compressedFile) throws IOException {
+        List<String> lines = Files.readAllLines(Paths.get(inputFile));
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        for (String line : lines) {
+            counts.merge(line, 1, Integer::sum);
+        }
+
+        List<String> compressed = new ArrayList<>();
+        for (Map.Entry<String, Integer> e : counts.entrySet()) {
+            compressed.add(e.getValue() + "|" + e.getKey());
+        }
+        Files.write(Paths.get(compressedFile), compressed);
+        System.out.println("файл сжат: " + compressedFile);
+    }
+
+    public static void main(String[] args) throws IOException {
+        String original = "input.txt";
+        String dedup = "output.txt";
+        String compressed = "compressed.txt";
+        String restored = "restored.txt";
+
+        removeDuplicates(original, dedup);
+        compress(dedup, compressed);
+        restore(compressed, restored);
+    }
+}
