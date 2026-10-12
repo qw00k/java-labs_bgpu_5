@@ -1,0 +1,169 @@
+zoo/
+├── animals/
+│   ├── Animal.java
+│   ├── Mammal.java
+│   ├── Bird.java
+│   ├── Lion.java
+│   ├── Elephant.java
+│   └── Parrot.java
+├── behaviors/
+│   ├── Swimmable.java
+│   ├── Flyable.java
+│   └── Feedable.java
+└── Main.java
+
+package behaviors;
+
+public interface Swimmable {
+    void swim();
+}
+
+package behaviors;
+
+public interface Flyable {
+    void fly();
+}
+
+package behaviors;
+
+public interface Feedable {
+    void eat();
+}
+
+package animals;
+
+import behaviors.Feedable;
+
+public abstract class Animal implements Feedable {
+    protected String name;
+
+    public Animal(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public abstract void makeSound();
+}
+
+package animals;
+
+public abstract class Mammal extends Animal {
+    public Mammal(String name) {
+        super(name);
+    }
+
+    public void feedMilk() {
+        System.out.println(name + " кормит детёныша молоком");
+    }
+}
+
+package animals;
+
+public abstract class Bird extends Animal {
+    public Bird(String name) {
+        super(name);
+    }
+
+    public void layEggs() {
+        System.out.println(name + " откладывает яйца");
+    }
+}
+
+package animals;
+
+import behaviors.Swimmable;
+
+public class Lion extends Mammal implements Swimmable {
+    public Lion(String name) {
+        super(name);
+    }
+
+    @Override
+    public void makeSound() {
+        System.out.println(name + ": Рррр!");
+    }
+
+    @Override
+    public void swim() {
+        System.out.println(name + " плавает");
+    }
+
+    @Override
+    public void eat() {
+        System.out.println(name + " ест мясо");
+    }
+}
+
+package animals;
+
+import behaviors.Swimmable;
+
+public class Elephant extends Mammal implements Swimmable {
+    public Elephant(String name) {
+        super(name);
+    }
+
+    @Override
+    public void makeSound() {
+        System.out.println(name + ": Тууу!");
+    }
+
+    @Override
+    public void swim() {
+        System.out.println(name + " плавает");
+    }
+
+    @Override
+    public void eat() {
+        System.out.println(name + " ест траву");
+    }
+}
+
+package animals;
+
+import behaviors.Flyable;
+
+public class Parrot extends Bird implements Flyable {
+    public Parrot(String name) {
+        super(name);
+    }
+
+    @Override
+    public void makeSound() {
+        System.out.println(name + ": Ке-ке!");
+    }
+
+    @Override
+    public void fly() {
+        System.out.println(name + " летает");
+    }
+
+    @Override
+    public void eat() {
+        System.out.println(name + " ест зёрна");
+    }
+}
+
+import animals.*;
+import behaviors.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Lion lion = new Lion("Лео");
+        Elephant elephant = new Elephant("Дамбо");
+        Parrot parrot = new Parrot("Кеша");
+
+        Animal[] animals = { lion, elephant, parrot };
+
+        for (Animal a : animals) {
+            a.makeSound();
+            a.eat();
+
+            if (a instanceof Swimmable) ((Swimmable) a).swim();
+            if (a instanceof Flyable) ((Flyable) a).fly();
+        }
+    }
+}
