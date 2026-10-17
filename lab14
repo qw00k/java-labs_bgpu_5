@@ -1,0 +1,89 @@
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+import java.io.File;
+
+public class XmlTreeViewer extends JFrame {
+
+    private final JTree tree;
+
+    public XmlTreeViewer(File xmlFile) throws Exception {
+        super("XML Viewer — " + xmlFile.getName());
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setSize(600, 500);
+        setLocationRelativeTo(null);
+
+        // Парсинг XML
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document doc = builder.parse(xmlFile);
+        doc.getDocumentElement().normalize();
+
+        // Строим дерево
+        DefaultMutableTreeNode root = buildTree(doc.getDocumentElement());
+
+        tree = new JTree(root);
+        tree.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        add(new JScrollPane(tree), BorderLayout.CENTER);
+
+        // Кнопка «Развернуть всё»
+        JButton expandBtn = new JButton("Развернуть всё");
+        expandBtn.addActionListener(e -> {
+            for (int i = 0; i < tree.getRowCount(); i++) tree.expandRow(i);
+        });
+        JButton collapseBtn = new JButton("Свернуть всё");
+        collapseBtn.addActionListener(e -> {
+            for (int i = tree.getRowCount() - 1; i >= 0; i--) tree.collapseRow(i);
+        });
+
+        JPanel bottom = new JPanel();
+        bottom.add(expandBtn);
+        bottom.add(collapseBtn);
+        add(bottom, BorderLayout.SOUTH);
+    }
+
+    // Рекурсивное построение узлов дерева
+    private DefaultMutableTreeNode buildTree(Element element) {
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode("<" + element.getTagName() + ">");
+
+        // Добавляем текстовое содержимое, если есть и нет дочерних элементов
+        NodeList children = element.getChildNodes();
+        boolean hasElementChildren = false;
+
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+
+            if (child.getNodeType() == Node.ELEMENT_NODE) {
+                hasElementChildren = true;
+                node.add(buildTree((Element) child));
+            } else if (child.getNodeType() == Node.TEXT_NODE) {
+                String text = child.getTextContent().trim();
+                if (!text.isEmpty() && !hasElementChildren) {
+                    node.add(new DefaultMutableTreeNode("\"" + text + "\""));
+                }
+            }
+        }
+        return node;
+    }
+
+    // Точка входа
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Выберите XML-файл");
+
+            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    new XmlTreeViewer(chooser.getSelectedFile()).setVisible(true);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null,
+                            "Ошибка парсинга XML: " + ex.getMessage(),
+                            "Ошибка", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                System.exit(0);
+            }
+        });
+    }
+}
