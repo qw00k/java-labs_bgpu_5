@@ -1,0 +1,42 @@
+import javax.swing.*;
+import java.awt.*;
+
+public class LayoutDemo extends JFrame {
+
+    public LayoutDemo() {
+        super("демонстрация менеджеров компоновки");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setSize(600, 400);
+        setLocationRelativeTo(null);
+
+        setLayout(new BorderLayout(10, 10));
+
+        JLabel title = new JLabel("BorderLayout + FlowLayout", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 18));
+        title.setOpaque(true);
+        title.setBackground(new Color(220, 230, 250));
+        add(title, BorderLayout.NORTH);
+
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 15));
+        centerPanel.setBackground(new Color(245, 245, 220));
+        centerPanel.setBorder(BorderFactory.createTitledBorder("панель с FlowLayout"));
+
+        for (int i = 1; i <= 8; i++) {
+            JButton btn = new JButton("кнопка " + i);
+            btn.setPreferredSize(new Dimension(120, 40));
+            centerPanel.add(btn);
+        }
+
+        add(centerPanel, BorderLayout.CENTER);
+
+        JLabel status = new JLabel("BorderLayout: NORTH / CENTER / SOUTH", SwingConstants.CENTER);
+        status.setOpaque(true);
+        status.setBackground(new Color(220, 250, 220));
+        add(status, BorderLayout.SOUTH);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new LayoutDemo().setVisible(true));
+    }
+}
