@@ -14,25 +14,22 @@ public class XmlTreeViewer extends JFrame {
         setSize(600, 500);
         setLocationRelativeTo(null);
 
-        // Парсинг XML
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.parse(xmlFile);
         doc.getDocumentElement().normalize();
 
-        // Строим дерево
         DefaultMutableTreeNode root = buildTree(doc.getDocumentElement());
 
         tree = new JTree(root);
         tree.setFont(new Font("Monospaced", Font.PLAIN, 13));
         add(new JScrollPane(tree), BorderLayout.CENTER);
 
-        // Кнопка «Развернуть всё»
-        JButton expandBtn = new JButton("Развернуть всё");
+        JButton expandBtn = new JButton("развернуть всё");
         expandBtn.addActionListener(e -> {
             for (int i = 0; i < tree.getRowCount(); i++) tree.expandRow(i);
         });
-        JButton collapseBtn = new JButton("Свернуть всё");
+        JButton collapseBtn = new JButton("свернуть всё");
         collapseBtn.addActionListener(e -> {
             for (int i = tree.getRowCount() - 1; i >= 0; i--) tree.collapseRow(i);
         });
@@ -43,11 +40,9 @@ public class XmlTreeViewer extends JFrame {
         add(bottom, BorderLayout.SOUTH);
     }
 
-    // Рекурсивное построение узлов дерева
     private DefaultMutableTreeNode buildTree(Element element) {
         DefaultMutableTreeNode node = new DefaultMutableTreeNode("<" + element.getTagName() + ">");
 
-        // Добавляем текстовое содержимое, если есть и нет дочерних элементов
         NodeList children = element.getChildNodes();
         boolean hasElementChildren = false;
 
@@ -67,19 +62,18 @@ public class XmlTreeViewer extends JFrame {
         return node;
     }
 
-    // Точка входа
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFileChooser chooser = new JFileChooser();
-            chooser.setDialogTitle("Выберите XML-файл");
+            chooser.setDialogTitle("выберите XML-файл");
 
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 try {
                     new XmlTreeViewer(chooser.getSelectedFile()).setVisible(true);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null,
-                            "Ошибка парсинга XML: " + ex.getMessage(),
-                            "Ошибка", JOptionPane.ERROR_MESSAGE);
+                            "ошибка парсинга XML: " + ex.getMessage(),
+                            "ошибка", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
                 System.exit(0);
